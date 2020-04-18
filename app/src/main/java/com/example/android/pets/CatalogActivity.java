@@ -18,7 +18,7 @@ package com.example.android.pets;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
@@ -28,18 +28,13 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.android.pets.data.PetContract;
-import com.example.android.pets.data.PetDbHelper;
+
 import com.example.android.pets.data.PetContract.PetEntry;
 
 /**
  * Displays list of pets that were entered and stored in the app.
  */
 public class CatalogActivity extends AppCompatActivity {
-
-    // Database helper that will provide us access to the database */
-    private PetDbHelper mDbHelper;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,9 +50,6 @@ public class CatalogActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
-        // To access our database, we instantiate our subclass of SQLiteOpenHelper
-        // and pass the context, which is the current activity.
-        mDbHelper = new PetDbHelper(this);
     }
 
     //This method is called when catalog activity is started
@@ -84,16 +76,6 @@ public class CatalogActivity extends AppCompatActivity {
                 PetEntry.COLUMN_PET_WEIGHT };
 
         // Query on the pets table
-        /**Cursor cursor = db.query(
-                PetEntry.TABLE_NAME,        // The table to query
-                projection,                 // The columns to return
-                null,              // The columns for the WHERE clause
-                null,           // The values for the WHERE clause
-                null,               // Don't group the rows
-                null,                // Don't filter by row groups
-                null);              // The sort order
-        */
-
         Cursor cursor = getContentResolver().query(
                 PetEntry.CONTENT_URI,       // The content URI of the words table
                 projection,                 // The columns to return for each row
@@ -149,12 +131,6 @@ public class CatalogActivity extends AppCompatActivity {
     }
 
     private void insertPet(){
-        // To access our database, we instantiate our subclass of SQLiteOpenHelper
-        // and pass the context, which is the current activity.
-        mDbHelper = new PetDbHelper(this);
-
-        //Get the data repository in write mode
-        SQLiteDatabase db = mDbHelper.getWritableDatabase();
 
         //map of keys where column names are the keys
         ContentValues contentValues = new ContentValues();
@@ -170,16 +146,17 @@ public class CatalogActivity extends AppCompatActivity {
         // this is set to "null", then the framework will not insert a row when
         // there are no values).
         // The third argument is the ContentValues object containing the info for Toto.
-        long newRowId = db.insert(PetEntry.TABLE_NAME, null, contentValues);
-
+        Uri newUri = getContentResolver().insert(PetEntry.CONTENT_URI, contentValues);
 
         // Show a toast message depending on whether or not the insertion was successful
-        if (newRowId == -1) {
-            // If the row ID is -1, then there was an error with insertion.
-            Toast.makeText(this, "Error with saving pet", Toast.LENGTH_SHORT).show();
+        if (newUri == null) {
+            // If the new content URI is null, then there was an error with insertion.
+            Toast.makeText(this, getString(R.string.editor_insert_pet_failed),
+                    Toast.LENGTH_SHORT).show();
         } else {
-            // Otherwise, the insertion was successful and we can display a toast with the row ID.
-            Toast.makeText(this, "Pet saved with row id: " + newRowId, Toast.LENGTH_SHORT).show();
+            // Otherwise, the insertion was successful and we can display a toast.
+            Toast.makeText(this, getString(R.string.editor_insert_pet_successful),
+                    Toast.LENGTH_SHORT).show();
         }
 
     }
