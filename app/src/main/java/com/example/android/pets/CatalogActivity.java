@@ -28,6 +28,7 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.android.pets.data.PetContract;
 import com.example.android.pets.data.PetDbHelper;
 import com.example.android.pets.data.PetContract.PetEntry;
 
@@ -72,8 +73,6 @@ public class CatalogActivity extends AppCompatActivity {
      * the pets database.
      */
     private void displayDatabaseInfo() {
-        // Create and/or open a database to read from it
-        SQLiteDatabase db = mDbHelper.getReadableDatabase();
 
         // Projection that specifies which columns from the database
         // will be actually used after this query.
@@ -85,7 +84,7 @@ public class CatalogActivity extends AppCompatActivity {
                 PetEntry.COLUMN_PET_WEIGHT };
 
         // Query on the pets table
-        Cursor cursor = db.query(
+        /**Cursor cursor = db.query(
                 PetEntry.TABLE_NAME,        // The table to query
                 projection,                 // The columns to return
                 null,              // The columns for the WHERE clause
@@ -93,6 +92,14 @@ public class CatalogActivity extends AppCompatActivity {
                 null,               // Don't group the rows
                 null,                // Don't filter by row groups
                 null);              // The sort order
+        */
+
+        Cursor cursor = getContentResolver().query(
+                PetEntry.CONTENT_URI,       // The content URI of the words table
+                projection,                 // The columns to return for each row
+                null,              // Selection criteria
+                null,           // Selection criteria
+                null);             // The sort order for the returned rows
 
         TextView displayView = findViewById(R.id.text_view_pet);
 

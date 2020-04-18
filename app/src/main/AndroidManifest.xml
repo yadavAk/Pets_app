@@ -38,6 +38,7 @@
                 android:value=".CatalogActivity" />
         </activity>
 
+        //Content Authority
         <provider
             android:name=".data.PetProvider"
             android:authorities="com.example.android.pets"
