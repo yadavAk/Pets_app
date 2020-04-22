@@ -16,7 +16,6 @@
 package com.example.android.pets;
 
 import android.content.ContentValues;
-import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
@@ -47,7 +46,7 @@ public class EditorActivity extends AppCompatActivity {
     /** EditText field to enter the pet's weight */
     private EditText mWeightEditText;
 
-    /** EditText field to enter the pet's gender */
+    /** Spinner field to enter the pet's gender */
     private Spinner mGenderSpinner;
 
     /**
