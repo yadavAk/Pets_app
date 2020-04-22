@@ -15,6 +15,7 @@
  */
 package com.example.android.pets;
 
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
@@ -46,7 +47,7 @@ import java.net.URI;
 public class EditorActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
     //loader initializer with unique id 0
-    private static final int PET_LOADER = 0;
+    private static final int PET_LOADER = 1;
 
     /** Content URI for the existing pet (null if it's a new pet) */
     private Uri mCurrentPetUri;
@@ -78,8 +79,8 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         Uri currentPetUri = getIntent().getData();
         if(currentPetUri != null) {
             setTitle(R.string.editor_activity_title_edit_pet);
-            mCurrentPetUri = currentPetUri;
         }
+        mCurrentPetUri = currentPetUri;
         // Find all relevant views that we will need to read user input from
         mNameEditText = findViewById(R.id.edit_pet_name);
         mBreedEditText = findViewById(R.id.edit_pet_breed);
@@ -132,7 +133,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         });
     }
 
-    private void insertPet(){
+    private void savePet(){
 
         mNameEditText = findViewById(R.id.edit_pet_name);
         mBreedEditText = findViewById(R.id.edit_pet_breed);
@@ -149,27 +150,45 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         contentValues.put(PetEntry.COLUMN_PET_GENDER, mGender);
         contentValues.put(PetEntry.COLUMN_PET_WEIGHT, weight);
 
-        // Insert a new row for Toto in the database, returning the ID of that new row.
-        // The first argument for db.insert() is the pets table name.
-        // The second argument provides the name of a column in which the framework
-        // can insert NULL in the event that the ContentValues is empty (if
-        // this is set to "null", then the framework will not insert a row when
-        // there are no values).
-        // The third argument is the ContentValues object containing the info for Toto.
-        //long newRowId = db.insert(PetEntry.TABLE_NAME, null, contentValues);
-        Uri newUri = getContentResolver().insert(PetEntry.CONTENT_URI, contentValues);
 
-        // Show a toast message depending on whether or not the insertion was successful
-        if (newUri == null) {
-            // If the new content URI is null, then there was an error with insertion.
-            Toast.makeText(this, getString(R.string.editor_insert_pet_failed),
-                    Toast.LENGTH_SHORT).show();
-        } else {
-            // Otherwise, the insertion was successful and we can display a toast.
-            Toast.makeText(this, getString(R.string.editor_insert_pet_successful),
-                    Toast.LENGTH_SHORT).show();
+        if(mCurrentPetUri == null) {
+            // Insert a new row for Toto in the database, returning the ID of that new row.
+            // The first argument for db.insert() is the pets table name.
+            // The second argument provides the name of a column in which the framework
+            // can insert NULL in the event that the ContentValues is empty (if
+            // this is set to "null", then the framework will not insert a row when
+            // there are no values).
+            // The third argument is the ContentValues object containing the info for Toto.
+            Uri newUri = getContentResolver().insert(PetEntry.CONTENT_URI, contentValues);
+
+            // Show a toast message depending on whether or not the insertion was successful
+            if (newUri == null) {
+                // If the new content URI is null, then there was an error with insertion.
+                Toast.makeText(this, getString(R.string.editor_insert_pet_failed),
+                        Toast.LENGTH_SHORT).show();
+            } else {
+                // Otherwise, the insertion was successful and we can display a toast.
+                Toast.makeText(this, getString(R.string.editor_insert_pet_successful),
+                        Toast.LENGTH_SHORT).show();
+            }
         }
-
+        else{
+            // Otherwise this is an EXISTING pet, so update the pet with content URI: mCurrentPetUri
+            // and pass in the new ContentValues. Pass in null for the selection and selection args
+            // because mCurrentPetUri will already identify the correct row in the database that
+            // we want to modify.
+            int rowsAffected = getContentResolver().update(mCurrentPetUri, contentValues, null, null);
+            // Show a toast message depending on whether or not the update was successful.
+            if (rowsAffected == 0) {
+                // If no rows were affected, then there was an error with the update.
+                Toast.makeText(this, getString(R.string.editor_update_pet_failed),
+                        Toast.LENGTH_SHORT).show();
+            } else {
+                // Otherwise, the update was successful and we can display a toast.
+                Toast.makeText(this, getString(R.string.editor_update_pet_successful),
+                        Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
     @Override
@@ -187,7 +206,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             // Respond to a click on the "Save" menu option
             case R.id.action_save:
                 // Insert pet to the database
-                insertPet();
+                savePet();
                 return true;
             // Respond to a click on the "Delete" menu option
             case R.id.action_delete:
