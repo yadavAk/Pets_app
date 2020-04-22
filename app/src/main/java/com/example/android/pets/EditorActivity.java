@@ -76,11 +76,12 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_editor);
 
-        Uri currentPetUri = getIntent().getData();
-        if(currentPetUri != null) {
+        mCurrentPetUri = getIntent().getData();
+        if(mCurrentPetUri != null) {
             setTitle(R.string.editor_activity_title_edit_pet);
+            //Kick off the loader
+            getSupportLoaderManager().initLoader(PET_LOADER, null, this);
         }
-        mCurrentPetUri = currentPetUri;
         // Find all relevant views that we will need to read user input from
         mNameEditText = findViewById(R.id.edit_pet_name);
         mBreedEditText = findViewById(R.id.edit_pet_breed);
@@ -89,9 +90,6 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
         //Spinner for gender selection
         setupSpinner();
-
-        //Kick off the loader
-        getSupportLoaderManager().initLoader(PET_LOADER, null, this);
     }
 
     /**
